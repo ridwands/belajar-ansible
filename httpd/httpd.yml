@@ -1,0 +1,16 @@
+---
+- hosts: centos
+  become: yes
+  tasks:
+    - name: Install Httpd
+      yum:
+        name: httpd
+        state: present
+    - name: Restart Httpd
+      service:
+         name: httpd
+         state: restarted
+    - name: Change index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
