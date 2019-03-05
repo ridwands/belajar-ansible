@@ -1,0 +1,25 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    user: pancaclan
+    password: 123
+    host: localhost
+  tasks:
+    - name: Install Mysql
+      yum:
+        state: present
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - mysql-server
+          - MySQL-python
+    - name: Start Mysql
+      service:
+        name: mysql
+        state: started
+    - name: Mysql User
+      mysql_user:
+        name: "{{user}}"
+        password: "{{password}}"
+        priv: '*.*:ALL'
