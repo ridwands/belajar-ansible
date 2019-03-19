@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - db_vars.yml
+  tasks:
+    - name: Install LEMP
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - nginx
+          - php-fpm
+          - php-mysql
+          - mariadb-server
+          - python-mysqldb
+    - name: Konfigurasi Nginx php-fpm
+      template:
+        src: default
+        dest: /etc/nginx/sites-available/default
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+    - name: Konfigurasi Mysql User
+      mysql_user:
+        name: "{{username}}"
+        password: "{{password}}"
+        priv: '*.*:ALL'
+    - name: Membuat Database Wordpress
+      mysql_db:
+        name: "{{db}}" 
+        state: present
+    - name: Download Wordpress
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /var/www/html/
+    - name: Ekstrak Wordpress 
+      unarchive:
+        src: /var/www/html/wordpress-5.1.1.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+    - name: Pindah Directory Wordpress
+      shell: cp -r /var/www/html/wordpress/* /var/www/html/
+    - name: Konfigurasi Database Wordpress
+      template:
+        src: wp-config.php.jn2
+        dest: /var/www/html/wp-config.php
